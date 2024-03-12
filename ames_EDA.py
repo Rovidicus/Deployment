@@ -56,3 +56,147 @@ null_values = buffer.getvalue()
 st.markdown("#### Null Values as String")
 st.text(null_values)
 
+# Function for producing histogram plot
+def plot_hist(df, column):
+    fig, ax = plt.subplots()
+    sns.histplot(data=df,x=column)
+    return fig
+# Defining figure object
+fig = plot_hist(df, "SalePrice")
+st.markdown("#### Display of plt histogram")
+st.pyplot(fig)
+
+# Plot function to return countplot and info on categorical feature
+def explore_categorical(df, x, fillna = True, placeholder = 'MISSING',
+                        figsize = (6,4), order = None):
+ 
+  # Make a copy of the dataframe and fillna 
+  temp_df = df.copy()
+  # Before filling nulls, save null value counts and percent for printing 
+  null_count = temp_df[x].isna().sum()
+  null_perc = null_count/len(temp_df)* 100
+  # fillna with placeholder
+  if fillna == True:
+    temp_df[x] = temp_df[x].fillna(placeholder)
+  # Create figure with desired figsize
+  fig, ax = plt.subplots(figsize=figsize)
+  # Plotting a count plot 
+  sns.countplot(data=temp_df, x=x, ax=ax, order=order)
+  # Rotate Tick Labels for long names
+  ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
+  # Add a title with the feature name included
+  ax.set_title(f"Column: {x}")
+  
+  # Fix layout and show plot (before print statements)
+  fig.tight_layout()
+  plt.show()
+    
+  return fig, ax
+# Define returned variables
+fig, ax = explore_categorical(df, 'Alley')
+st.markdown("#### Displaying a plot from explore_categorical function")
+st.pyplot(fig)
+
+def explore_numeric(df, x, figsize=(6,5) ):
+  """Source: https://login.codingdojo.com/m/606/13765/117605"""
+  # Making our figure with gridspec for subplots
+  gridspec = {'height_ratios':[0.7,0.3]}
+  fig, axes = plt.subplots(nrows=2, figsize=figsize,
+                           sharex=True, gridspec_kw=gridspec)
+  # Histogram on Top
+  sns.histplot(data=df, x=x, ax=axes[0])
+  # Boxplot on Bottom
+  sns.boxplot(data=df, x=x, ax=axes[1])
+  ## Adding a title
+  axes[0].set_title(f"Column: {x}", fontweight='bold')
+  ## Adjusting subplots to best fill Figure
+  fig.tight_layout()
+  # Ensure plot is shown before message
+  plt.show()
+  return fig
+st.markdown("#### Displaying a plot from explore_numeric function")
+fig = explore_numeric(df, 'Lot Frontage')
+st.pyplot(fig)
+
+# Final version of function
+def plot_categorical_vs_target(df, x, y='SalePrice',figsize=(6,4),
+                            fillna = True, placeholder = 'MISSING',
+                            order = None):
+  # Make a copy of the dataframe and fillna 
+  temp_df = df.copy()
+  # fillna with placeholder
+  if fillna == True:
+    temp_df[x] = temp_df[x].fillna(placeholder)
+  
+  # or drop nulls prevent unwanted 'nan' group in stripplot
+  else:
+    temp_df = temp_df.dropna(subset=[x]) 
+  # Create the figure and subplots
+  fig, ax = plt.subplots(figsize=figsize)
+  
+    # Barplot 
+  sns.barplot(data=temp_df, x=x, y=y, ax=ax, order=order, alpha=0.6,
+              linewidth=1, edgecolor='black', errorbar=None)
+  
+  # Boxplot
+  sns.stripplot(data=temp_df, x=x, y=y, hue=x, ax=ax, 
+                order=order, hue_order=order, legend=False,
+                edgecolor='white', linewidth=0.5,
+                size=3,zorder=0)
+  # Rotate xlabels
+  ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
+  
+  # Add a title
+  ax.set_title(f"{x} vs. {y}")
+  fig.tight_layout()
+  return fig, ax
+
+def plot_numeric_vs_target(df, x, y='SalePrice', figsize=(6,4), **kwargs): # kwargs for sns.regplot
+  # Calculate the correlation
+  corr = df[[x,y]].corr().round(2)
+  r = corr.loc[x,y]
+  # Plot the data
+  fig, ax = plt.subplots(figsize=figsize)
+  scatter_kws={'ec':'white','lw':1,'alpha':0.8}
+  sns.regplot(data=df, x=x, y=y, ax=ax, scatter_kws=scatter_kws, **kwargs) # Included the new argument within the sns.regplot function
+  ## Add the title with the correlation
+  ax.set_title(f"{x} vs. {y} (r = {r})")
+  # Make sure the plot is shown before the print statement
+  plt.show()
+  return fig, ax
+
+# Add a selectbox for all possible features
+column2 = st.selectbox(label="Select a column", options=columns_to_use)
+# Conditional statement to determine which function to use
+if df[column2].dtype == 'object':
+    fig, ax  = plot_categorical_vs_target(df, x=column2)
+else:
+    fig, ax = plot_numeric_vs_target(df, x=column2)
+st.markdown("#### Explore Features vs Sales Price")
+# Display appropriate eda plots
+st.pyplot(fig)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
