@@ -166,7 +166,7 @@ def plot_numeric_vs_target(df, x, y='SalePrice', figsize=(6,4), **kwargs): # kwa
   return fig, ax
 
 # Add a selectbox for all possible features
-column2 = st.selectbox(label="Select a column", options=columns_to_use)
+column2 = st.selectbox(label="Select a column", options=columns_to_use, key="col2")
 # Conditional statement to determine which function to use
 if df[column2].dtype == 'object':
     fig, ax  = plot_categorical_vs_target(df, x=column2)
@@ -176,9 +176,81 @@ st.markdown("#### Explore Features vs Sales Price")
 # Display appropriate eda plots
 st.pyplot(fig)
 
+import plotly.express as px
+import plotly.io as pio
+pio.templates.default='seaborn'
+
+# Use plotly for explore functions
+def plotly_explore_numeric(df, x):
+    fig = px.histogram(df,x=x,marginal='box',title=f'Distribution of {x}', 
+                      width=1000, height=500)
+    return fig
+def plotly_explore_categorical(df, x):
+    fig = px.histogram(df,x=x,color=x,title=f'Distribution of {x}', 
+                          width=1000, height=500)
+    fig.update_layout(showlegend=False)
+    return fig
+
+# Add a selectbox for all possible features
+column3 = st.selectbox(label="Select a column", options=columns_to_use, key="col3")
+# Conditional statement to determine which function to use
+if df[column3].dtype == 'object':
+    fig = plotly_explore_categorical(df, column3)
+else:
+    fig = plotly_explore_numeric(df, column3)
+    
+st.markdown("#### Displaying appropriate Plotly plot based on selected column")
+# Display appropriate eda plots
+st.plotly_chart(fig)
+
+# functionizing categoric vs target
+def plotly_categoric_vs_target(df, x, y = 'SalePrice', trendline = 'ols', add_hoverdata = True):
+    if add_hoverdata == True:
+        hover_data = list(df.columns)
+    else: 
+        hover_data = None
+        
+    pfig = px.histogram(df, x = x, y = y, histfunc = 'avg', width = 800, height = 600,
+                      hover_data = hover_data,
+                      trendline = trendline,
+                      trendline_color_override = 'red',
+                      title = f"{x} vs. {y}")
+    
+    pfig.update_traces(marker = dict(size=3),
+                      line = dict(dash='dash'))
+    pfig.update_layout(showlegend=False)
+    return pfig
 
 
 
+# functionizing numeric vs target
+def plotly_numeric_vs_target(df, x, y = 'SalePrice', trendline = 'ols', add_hoverdata = True):
+    if add_hoverdata == True:
+        hover_data = list(df.columns)
+    else: 
+        hover_data = None
+        
+    pfig = px.scatter(df, x = x, y = y, width=800, height=600,
+                     hover_data = hover_data,
+                      trendline = trendline,
+                      trendline_color_override = 'red',
+                     title = f"{x} vs. {y}")
+    
+    pfig.update_traces(marker = dict(size=3),
+                      line = dict(dash = 'dash'))
+    pfig.update_layout(showlegend=False)
+    return pfig
+
+# Add a selectbox for all possible features
+column4 = st.selectbox(label="Select a column", options=columns_to_use, key="col4")
+# Conditional statement to determine which function to use
+if df[column4].dtype == 'object':
+    fig = plotly_categoric_vs_target(df, column4)
+else:
+    fig = plotly_numeric_vs_target(df, column4)
+st.markdown("#### Plotly numeric or categoric")
+# Display appropriate eda plots
+st.plotly_chart(fig)
 
 
 
