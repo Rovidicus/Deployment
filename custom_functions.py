@@ -15,6 +15,7 @@ from sklearn.ensemble import BaggingRegressor, RandomForestRegressor
 from sklearn import set_config
 set_config(transform_output='pandas')
 from pprint import pprint
+import os
 
 # testing demo
 
@@ -120,6 +121,30 @@ def classification_metrics(y_true, y_pred, label='',
         return report_dict
 
 # evaluate classification
+
+def evaluate_classification(model, X_train, y_train, X_test, y_test,
+                         figsize=(6,4), normalize='true', output_dict = False,
+                            cmap_train='Blues', cmap_test="Reds",colorbar=False):
+  # Get predictions for training data
+  y_train_pred = model.predict(X_train)
+  # Call the helper function to obtain regression metrics for training data
+  results_train = classification_metrics(y_train, y_train_pred, #verbose = verbose,
+                                     output_dict=True, figsize=figsize,
+                                         colorbar=colorbar, cmap=cmap_train,
+                                     label='Training Data')
+  print()
+  # Get predictions for test data
+  y_test_pred = model.predict(X_test)
+  # Call the helper function to obtain regression metrics for test data
+  results_test = classification_metrics(y_test, y_test_pred, #verbose = verbose,
+                                  output_dict=True,figsize=figsize,
+                                         colorbar=colorbar, cmap=cmap_test,
+                                    label='Test Data' )
+  if output_dict == True:
+    # Store results in a dataframe if ouput_frame is True
+    results_dict = {'train':results_train,
+                    'test': results_test}
+    return results_dict
 
 def evaluate_classification_network(model, 
                                     X_train=None, y_train=None, 
@@ -474,3 +499,23 @@ def build_gru_model(text_vectorization_layer):
                   loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     gru_model.summary()
     return gru_model
+
+
+def create_directories_from_paths(nested_dict):
+    """OpenAI. (2023). ChatGPT [Large language model]. https://chat.openai.com 
+    Recursively create directories for file paths in a nested dictionary.
+    Parameters:
+    nested_dict (dict): The nested dictionary containing file paths.
+    """
+    for key, value in nested_dict.items():
+        if isinstance(value, dict):
+            # If the value is a dictionary, recurse into it
+            create_directories_from_paths(value)
+        elif isinstance(value, str):
+            # If the value is a string, treat it as a file path and get the directory path
+            directory_path = os.path.dirname(value)
+            # If the directory path is not empty and the directory does not exist, create it
+            if directory_path and not os.path.exists(directory_path):
+                os.makedirs(directory_path)
+                print(f"Directory created: {directory_path}")
+
