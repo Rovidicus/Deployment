@@ -204,24 +204,11 @@ st.markdown("#### Displaying appropriate Plotly plot based on selected column")
 st.plotly_chart(fig)
 
 # functionizing categoric vs target
-def plotly_categoric_vs_target(df, x, y = 'SalePrice', trendline = 'ols', add_hoverdata = True):
-    if add_hoverdata == True:
-        hover_data = list(df.columns)
-    else: 
-        hover_data = None
-        
-    pfig = px.histogram(df, x = x, y = y, histfunc = 'avg', width = 800, height = 600,
-                      hover_data = hover_data,
-                      trendline = trendline,
-                      trendline_color_override = 'red',
-                      title = f"{x} vs. {y}")
-    
-    pfig.update_traces(marker = dict(size=3),
-                      line = dict(dash='dash'))
-    pfig.update_layout(showlegend=False)
-    return pfig
-
-
+def plotly_categorical_vs_target(df, x, y='SalePrice', histfunc='avg', width=800,height=500):
+    fig = px.histogram(df, x=x,y=y, color=x, width=width, height=height,
+                       histfunc=histfunc, title=f'Compare {histfunc.title()} {y} by {x}')
+    fig.update_layout(showlegend=False)
+    return fig
 
 # functionizing numeric vs target
 def plotly_numeric_vs_target(df, x, y = 'SalePrice', trendline = 'ols', add_hoverdata = True):
